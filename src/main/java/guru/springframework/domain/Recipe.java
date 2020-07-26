@@ -1,6 +1,8 @@
 package guru.springframework.domain;
 
 import javax.persistence.*;
+import javax.persistence.criteria.CriteriaBuilder;
+import java.util.Set;
 
 @Entity
 public class Recipe {
@@ -17,6 +19,9 @@ public class Recipe {
     private String url;
     private String directions;
     //private Difficulty difficulty;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "recipe")
+    private Set<Ingredient> ingredients;
+
     @Lob //para objetos largos (mas de 255 caracteres)
     private  Byte[] image;
 
