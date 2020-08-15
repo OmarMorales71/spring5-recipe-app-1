@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 @Slf4j
@@ -20,7 +21,6 @@ public class RecipeServiceImpl implements RecipeService{
     }
 
     @Override
-    @Transactional
     public Set<Recipe> getRecipes() {
         log.debug("I'm in the service");
         Set<Recipe> recipeSet = new HashSet<>();
@@ -28,4 +28,17 @@ public class RecipeServiceImpl implements RecipeService{
         recipeRepository.findAll().iterator().forEachRemaining(recipeSet::add);
         return recipeSet;
     }
+
+    @Override
+    public Recipe findById(Long l) {
+        Optional<Recipe> recipeOptional= recipeRepository.findById(l);
+
+        if(!recipeOptional.isPresent())
+            throw new RuntimeException("Recipe Not Found!");
+
+
+        return recipeOptional.get();
+    }
+
+
 }
