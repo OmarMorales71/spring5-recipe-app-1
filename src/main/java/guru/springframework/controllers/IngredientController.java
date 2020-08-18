@@ -2,6 +2,8 @@ package guru.springframework.controllers;
 
 import guru.springframework.commands.IngredientCommand;
 import guru.springframework.commands.RecipeCommand;
+import guru.springframework.commands.UnitOfMeasureCommand;
+import guru.springframework.domain.UnitOfMeasure;
 import guru.springframework.services.IngredientService;
 import guru.springframework.services.RecipeService;
 import guru.springframework.services.UnitOfMeasureService;
@@ -36,6 +38,25 @@ public class IngredientController {
     }
 
     @GetMapping
+    @RequestMapping("/recipe/{recipeId}/ingredient/new")
+    public String newRecipeIngredient(@PathVariable String recipeId, Model model){
+
+        RecipeCommand recipeCommand = recipeService.findCommandById(Long.valueOf(recipeId));
+        //todo raise exception is null
+
+        IngredientCommand ingredientCommand = new IngredientCommand();
+        UnitOfMeasureCommand uom = new UnitOfMeasureCommand();
+        ingredientCommand.setRecipeId(Long.valueOf(recipeId));
+        ingredientCommand.setUom(uom);
+        model.addAttribute("ingredient", ingredientCommand);
+
+        model.addAttribute("uomList", unitOfMeasureService.getUnitOfMeasures());
+
+        return "recipe/ingredient/ingredientform";
+
+    }
+
+    @GetMapping
     @RequestMapping("/recipe/{recipeId}/ingredient/{id}/show")
     public String showRecipeIngredient(@PathVariable("recipeId") String recipeId,
                                        @PathVariable("id") String id,
@@ -67,6 +88,15 @@ public class IngredientController {
         log.debug("Saved recipe id:" + savedCommand.getRecipeId());
      log.debug("Saved ingredient id:" +savedCommand.getId());
         return "redirect:/recipe/"+savedCommand.getRecipeId()+"/ingredient/"+savedCommand.getId()+"/show";
+    }
+
+    @GetMapping
+    @RequestMapping("/recipe/{recipeId}/ingredient/{id}/delete")
+    public String deleteIngredient(@PathVariable("recipeId") String recipeId,
+                                   @PathVariable("id") String id){
+        ingredientService.deleteById(Long.valueOf(recipeId), Long.valueOf(id));
+
+        return "redirect:/recipe/"+recipeId+"/ingredients";
     }
 
 }
