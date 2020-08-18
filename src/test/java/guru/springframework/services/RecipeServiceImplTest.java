@@ -65,4 +65,12 @@ public class RecipeServiceImplTest {
         assertEquals(recipes.size(), 1);//true si son iguales
         verify(recipeRepository, times(1)).findAll();//verificar cuantas veces fue llamado el mock
     }
+
+    @Test
+    public void testDeleteById(){
+        Long idToDelete = Long.valueOf(2L);
+        recipeService.deleteById(idToDelete);
+
+        verify(recipeRepository, times(1)).deleteById(anyLong());
+    }
 }

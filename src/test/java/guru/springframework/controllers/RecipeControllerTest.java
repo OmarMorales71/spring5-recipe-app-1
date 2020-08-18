@@ -64,7 +64,6 @@ public class RecipeControllerTest {
 
     @Test
     public void testDeleteRecipeById() throws Exception {
-        RecipeCommand command = new RecipeCommand();
 
         mockMvc.perform(get("/recipe/1/delete"))
                 .andExpect(status().is3xxRedirection())
