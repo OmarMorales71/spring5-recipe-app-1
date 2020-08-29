@@ -6,9 +6,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import guru.springframework.exceptions.*;
 import org.springframework.web.servlet.ModelAndView;
+
+import javax.validation.Valid;
 
 
 @Slf4j
@@ -16,7 +19,7 @@ import org.springframework.web.servlet.ModelAndView;
 @RequestMapping("/recipe")
 public class RecipeController {
     private final RecipeService recipeService;
-
+    static final String RECIPE_RECIPEFORM_URL = "recipe/recipeform";
     public RecipeController(RecipeService recipeService) {
         this.recipeService = recipeService;
     }
@@ -54,7 +57,15 @@ public class RecipeController {
     }
 
     @PostMapping("")
-    public String saveOrUpdate(@ModelAttribute RecipeCommand command) {
+    public String saveOrUpdate(@Valid @ModelAttribute("recipe") RecipeCommand command, BindingResult result) {
+
+        if(result.hasErrors()){
+
+            result.getAllErrors().forEach(error ->{
+                log.debug(error.toString());
+            });
+            return RECIPE_RECIPEFORM_URL;
+        }
         RecipeCommand savedRecipeCommand = recipeService.saveRecipeCommand(command);
 
         return "redirect:/recipe/" + savedRecipeCommand.getId() + "/show";
@@ -73,16 +84,5 @@ public class RecipeController {
         return modelAndView;
     }
 
-    //Return 400 bad request
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler(NumberFormatException.class)
-    public ModelAndView handleBadRequest(Exception ex) {
-        log.error("handling bad request exception");
-        log.error(ex.getMessage());
-        ModelAndView modelAndView = new ModelAndView();
-        modelAndView.setViewName("400error");
-        modelAndView.addObject("exception", ex);
 
-        return modelAndView;
-    }
 }
