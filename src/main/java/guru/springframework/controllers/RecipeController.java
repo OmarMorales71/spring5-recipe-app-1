@@ -3,9 +3,12 @@ package guru.springframework.controllers;
 import guru.springframework.commands.RecipeCommand;
 import guru.springframework.services.RecipeService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import guru.springframework.exceptions.*;
+import org.springframework.web.servlet.ModelAndView;
 
 
 @Slf4j
@@ -20,7 +23,7 @@ public class RecipeController {
 
 
     @GetMapping("/{id}/show")
-    public String showById(@PathVariable String id, Model model){
+    public String showById(@PathVariable String id, Model model) {
         model.addAttribute("recipe", recipeService.findById(new Long(id)));
 
         return "recipe/show";
@@ -28,7 +31,7 @@ public class RecipeController {
 
 
     @GetMapping("/{id}/update")
-    public String updateById(@PathVariable String id, Model model){
+    public String updateById(@PathVariable String id, Model model) {
         model.addAttribute("recipe", recipeService.findCommandById(Long.valueOf(id)));
 
         return "recipe/recipeform";
@@ -36,24 +39,50 @@ public class RecipeController {
 
 
     @GetMapping("/{id}/delete")
-    public String deleteById(@PathVariable String id, Model model){
-        log.debug("Deleting id: "+id);
+    public String deleteById(@PathVariable String id, Model model) {
+        log.debug("Deleting id: " + id);
 
         recipeService.deleteById(Long.valueOf(id));
         return "redirect:/";
     }
 
     @GetMapping("/new")
-    public String newRecipe(Model model){
+    public String newRecipe(Model model) {
         model.addAttribute("recipe", new RecipeCommand());
 
         return "recipe/recipeform";
     }
 
     @PostMapping("")
-    public String saveOrUpdate(@ModelAttribute RecipeCommand command){
+    public String saveOrUpdate(@ModelAttribute RecipeCommand command) {
         RecipeCommand savedRecipeCommand = recipeService.saveRecipeCommand(command);
 
-        return "redirect:/recipe/"+savedRecipeCommand.getId()+"/show";
+        return "redirect:/recipe/" + savedRecipeCommand.getId() + "/show";
+    }
+
+    //Return 404 not found
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler(NotFoundException.class)
+    public ModelAndView handleNotFound(Exception ex) {
+        log.error("handling not found exception");
+        log.error(ex.getMessage());
+        ModelAndView modelAndView = new ModelAndView();
+        modelAndView.setViewName("404error");
+        modelAndView.addObject("exception", ex);
+
+        return modelAndView;
+    }
+
+    //Return 400 bad request
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(NumberFormatException.class)
+    public ModelAndView handleBadRequest(Exception ex) {
+        log.error("handling bad request exception");
+        log.error(ex.getMessage());
+        ModelAndView modelAndView = new ModelAndView();
+        modelAndView.setViewName("400error");
+        modelAndView.addObject("exception", ex);
+
+        return modelAndView;
     }
 }
